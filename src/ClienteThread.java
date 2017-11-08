@@ -33,17 +33,16 @@ class ClienteThread extends Thread {
         return 0;
     }
 
-    public void run(){
+    public void run() {
 
-        if(this.getClienteId() == 1){
+        if (this.getClienteId() == 1) {
             cliente[idCliente].visualizaAssentos();
 
-        } else if(this.getClienteId() == 2){
+        } else if (this.getClienteId() == 2) {
             cliente[idCliente].visualizaAssentos();
 
-        } else if(this.getClienteId() == 3){
+        } else if (this.getClienteId() == 3) {
             cliente[idCliente].visualizaAssentos();
         }
-
     }
 }
