@@ -236,7 +236,6 @@ class ClienteThread extends Thread {
                 }
             }
             System.out.println("\n TODAS AS OUTRAS THREADS TERMINARAM");
-            System.out.println(" Arquivo de Log " + nome_arquivo_log + " gerado");
             imprimeLog();
 
         }
@@ -257,6 +256,7 @@ class ClienteThread extends Thread {
             bw.write(logString);
             bw.close();
             fw.close();
+            System.out.println(" Arquivo de Log " + nome_arquivo_log + " gerado com sucesso!");
 
         } catch (IOException e) {
             e.printStackTrace();
