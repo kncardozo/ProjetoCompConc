@@ -1,3 +1,7 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 class ClienteThread extends Thread {
@@ -39,7 +43,7 @@ class ClienteThread extends Thread {
             Vector temp = new Vector();
             temp.add("1, " + String.valueOf(idCliente) + ", " + String.valueOf(estadosAssentos) + "\n");
             log.add(temp);
-            System.out.println("Log:\n" + log);
+//            System.out.println("Log:\n" + log);
 
             System.out.println(estadosAssentos + " visualizado pelo cliente " + idCliente);
 
@@ -85,7 +89,7 @@ class ClienteThread extends Thread {
                     Vector temp = new Vector();
                     temp.add("2, " + String.valueOf(idCliente) + ", " + String.valueOf(lugarLivreAleatorio) + ", " + String.valueOf(estadosAssentos) + "\n");
                     log.add(temp);
-                    System.out.println("Log:" + log);
+//                    System.out.println("Log:\n" + log);
 
 
                     System.out.println("Cliente " + idCliente + " RESERVOU o " + assento[lugarLivreAleatorio].id_Assento + " com sucesso");
@@ -117,7 +121,7 @@ class ClienteThread extends Thread {
                     Vector temp = new Vector();
                     temp.add("3, " + String.valueOf(idCliente) + ", " + String.valueOf(id_Assento) + ", " + String.valueOf(estadosAssentos) + "\n");
                     log.add(temp);
-                    System.out.println("Log:" + log);
+//                    System.out.println("Log:\n" + log);
 
 
                     System.out.println("Cliente " + idCliente + " RESERVOU o assento " + assento[id_Assento].id_Assento + " como desejado");
@@ -155,7 +159,7 @@ class ClienteThread extends Thread {
                     Vector temp = new Vector();
                     temp.add("4, " + String.valueOf(idCliente) + ", " + String.valueOf(id_Assento) + ", " + String.valueOf(estadosAssentos) + "\n");
                     log.add(temp);
-                    System.out.println("Log:" + log);
+//                    System.out.println("Log:\n" + log);
 
 
 
@@ -182,7 +186,7 @@ class ClienteThread extends Thread {
                 visualizaAssentos();
                 synchronized (this) {
                     barreira++;             // esta thread terminou sua execucao
-                    this.notify();
+                    this.notifyAll();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -198,7 +202,7 @@ class ClienteThread extends Thread {
                 visualizaAssentos();
                 synchronized (this) {
                     barreira++;             // esta thread terminou sua execucao
-                    this.notify();
+                    this.notifyAll();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -215,7 +219,7 @@ class ClienteThread extends Thread {
                 visualizaAssentos();
                 synchronized (this) {
                     barreira++;             // esta thread terminou sua execucao
-                    this.notify();
+                    this.notifyAll();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -232,11 +236,31 @@ class ClienteThread extends Thread {
                 }
             }
             System.out.println("\n TODAS AS OUTRAS THREADS TERMINARAM");
+            System.out.println(" Arquivo de Log " + nome_arquivo_log + " gerado");
+            imprimeLog();
 
         }
 
     }
 
     private void imprimeLog() {
+        try {
+            String logString = String.valueOf(log);
+            logString = logString.replace("[[","");
+            logString = logString.replace("]]","");
+            logString = logString.replace("], [","");
+
+            FileWriter fw;
+            File arquivo = new File(nome_arquivo_log);
+            fw = new FileWriter(arquivo);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(logString);
+            bw.close();
+            fw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
