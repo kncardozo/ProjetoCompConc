@@ -48,7 +48,7 @@ class ClienteThread extends Thread {
             System.out.println(estadosAssentos + " visualizado pelo cliente " + idCliente);
 
             logAtualizado = true;
-            notify();
+            notifyAll();
         } else {
             wait();
         }
@@ -69,7 +69,7 @@ class ClienteThread extends Thread {
                 if (qtdAssentosLivres == 0) {
                     System.out.println("Cliente " + idCliente + " tentou reservar um assento, mas não havia mais assentos livres");
                     logAtualizado = true;
-                    notify();
+                    notifyAll();
                     return 0;
 
                 } else {
@@ -94,7 +94,7 @@ class ClienteThread extends Thread {
 
                     System.out.println("Cliente " + idCliente + " RESERVOU o " + assento[lugarLivreAleatorio].id_Assento + " com sucesso");
                 logAtualizado = true;
-                notify();
+                notifyAll();
                 }
             } else {
                 wait();
@@ -126,13 +126,13 @@ class ClienteThread extends Thread {
 
                     System.out.println("Cliente " + idCliente + " RESERVOU o assento " + assento[id_Assento].id_Assento + " como desejado");
                 logAtualizado = true;
-                notify();
+                notifyAll();
                 return 1;
 
                 } else {
                     System.out.println("Cliente " + idCliente + " tentou reservar o assento desejado " + assento[id_Assento].id_Assento + " mas não conseguiu");
                     logAtualizado = true;
-                    notify();
+                    notifyAll();
                 }
         } else {
             wait();
@@ -171,7 +171,7 @@ class ClienteThread extends Thread {
                     System.out.println("Cliente " + idCliente + " tentou liberar o assento " + assento[id_Assento].id_Assento + " que já estava vazio");
                 }
                 logAtualizado=true;
-                notify();
+                notifyAll();
         }else {
             wait();
         }
