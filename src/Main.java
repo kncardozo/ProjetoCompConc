@@ -1,6 +1,6 @@
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         String nome_arquivo_log = args[0];
         int qtd_assentos = Integer.parseInt(args[1]);
@@ -18,10 +18,12 @@ public class Main {
             cliente[i] = new ClienteThread(i, assento);
             cliente[i].start();
         }
+
         // criando a thread de log
+        while (cliente[1].isAlive() || cliente[2].isAlive() || cliente[3].isAlive()) {
+            Thread.sleep(200);
+        }
         ClienteThread log = new ClienteThread(0, nome_arquivo_log);
         log.start();
-
-
     }
 }
