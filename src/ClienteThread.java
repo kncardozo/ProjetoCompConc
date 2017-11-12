@@ -28,24 +28,26 @@ class ClienteThread extends Thread {
         System.out.println("\nLog de ID " + idCliente + " criado");
     }
 
-    boolean checaLog(){
+    void checaLog(){
         synchronized (ClienteThread.class) {
             System.out.println("----- THREAD " + idCliente + " = CHECOU O LOG: " + logAtualizado);
-            return logAtualizado;
+            logAtualizado = !logAtualizado;
         }
     }
     
-    synchronized boolean mudaLog(){
-            System.out.println("----- THREAD " + idCliente + " = MUDOU O ESTADO DO LOG PARA: " + !logAtualizado);
-            return !logAtualizado;
+    void mudaLog(boolean log){
+            System.out.println("----- THREAD " + idCliente + " = O ESTADO DO LOG ERA " + log + " E VAI MUDAR PARA: " + !log);
+            logAtualizado = !logAtualizado;
     }
 
     synchronized void visualizaAssentos() throws InterruptedException {
-
+        synchronized (this){
         System.out.println("----- THREAD " + idCliente + " = VAI CHECAR O LOG PELA VISUALIZA: " + logAtualizado);
-        if (checaLog()) {
 
-            System.out.println("----- THREAD " + idCliente + " = ENTROU NO VISUALIZA");
+
+        if (logAtualizado) {
+            mudaLog(logAtualizado);
+            System.out.println("----- THREAD " + idCliente + " = ENTROU NO VISUALIZA E O LOG ESTÁ " + logAtualizado);
 
 
 
@@ -67,26 +69,31 @@ class ClienteThread extends Thread {
 
             System.out.println(estadosAssentos + " visualizado pelo cliente " + idCliente);
 
-            System.out.println("----- THREAD " + idCliente + " = NOTIFY DO VISUALIZA");
-            notifyAll();
+            mudaLog(logAtualizado);
+            notify();
+            System.out.println("----- THREAD " + idCliente + " = NOTIFY DO VISUALIZA COM O LOG: " + logAtualizado);
 
 
 
         } else {
             System.out.println("----- THREAD " + idCliente + " = WAIT DO VISUALIZA");
-            wait();
+            while (!logAtualizado){
+                Thread.sleep(1000);
+            }
         }
+    }
     }
 
     synchronized int alocaAssentoLivre() throws InterruptedException {
         System.out.println("----- THREAD " + idCliente + " = VAI CHECAR O LOG PELA ASSENTO LIVRE: " + logAtualizado);
 
-        if (checaLog()) {
+        if (logAtualizado) {
+            mudaLog(logAtualizado);
 
 
 
 
-            System.out.println("----- THREAD " + idCliente + " = ENTROU NO ASSENTO LIVRE");
+            System.out.println("----- THREAD " + idCliente + " = ENTROU NO ASSENTO LIVRE E O LOG ESTÁ " + logAtualizado);
 
             Vector<Integer> assentosLivres = new Vector<>();
             int qtdAssentosLivres = 0;
@@ -97,16 +104,19 @@ class ClienteThread extends Thread {
                 }
             }
 
+            System.out.println("ASSENTOS LIVRES: " + assentosLivres);
+
             if (qtdAssentosLivres == 0) {
                 System.out.println("Cliente " + idCliente + " tentou reservar um assento, mas não havia mais assentos livres");
+                mudaLog(logAtualizado);
                 notifyAll();
                 return 0;
 
             } else {
-                int lugarLivreAleatorio = 1 + (int) (Math.random() * qtdAssentosLivres);
-                assento[lugarLivreAleatorio].id_Cliente = idCliente;
-                assento[lugarLivreAleatorio].status = 1;
-
+                synchronized (ClienteThread.class) {
+                    int assentoLivre = assentosLivres.get(0);
+                    assento[assentoLivre].id_Cliente = idCliente;
+                    assento[assentoLivre].status = 1;
 
 
 //      ====================== ATIVIDADES DO LOG ======================
@@ -119,21 +129,24 @@ class ClienteThread extends Thread {
                         }
                     }
                     Vector temp = new Vector();
-                    temp.add("2, " + String.valueOf(idCliente) + ", " + String.valueOf(lugarLivreAleatorio) + ", " + String.valueOf(estadosAssentos) + "\n");
+                    temp.add("2, " + String.valueOf(idCliente) + ", " + String.valueOf(assentoLivre) + ", " + String.valueOf(estadosAssentos) + "\n");
                     log.add(temp);
 //      ===============================================================
 
 
-
-                    System.out.println("Cliente " + idCliente + " RESERVOU o " + assento[lugarLivreAleatorio].id_Assento + " com sucesso");
-
-                    System.out.println("----- THREAD " + idCliente + " = NOTIFY DO ASSENTO LIVRE");
-                    notifyAll();
+                    System.out.println("Cliente " + idCliente + " RESERVOU o assento " + assento[assentoLivre].id_Assento + " com sucesso");
                 }
+                mudaLog(logAtualizado);
+                notifyAll();
+                System.out.println("----- THREAD " + idCliente + " = NOTIFY DO ASSENTO LIVRE COM O LOG: " + logAtualizado);
 
-            } else {
-                System.out.println("----- THREAD " + idCliente + " = WAIT DO VISUALIZA ASSENTO LIVRE");
-                wait();
+            }
+
+        } else {
+            System.out.println("----- THREAD " + idCliente + " = WAIT DO VISUALIZA ASSENTO LIVRE");
+            while (!logAtualizado){
+                Thread.sleep(1000);
+            };
         }
         return 1;
     }
@@ -141,17 +154,19 @@ class ClienteThread extends Thread {
     synchronized int alocaAssentoDado(int id_Assento) throws InterruptedException {
         System.out.println("----- THREAD " + idCliente + " = VAI CHECAR O LOG PELA ASSENTO DADO: " + logAtualizado);
 
-        if(checaLog()){
+        if(logAtualizado){
+            mudaLog(logAtualizado);
 
 
 
 
-            System.out.println("----- THREAD " + idCliente + " = ENTROU NO ASSENTO DADO");
+            System.out.println("----- THREAD " + idCliente + " = ENTROU NO ASSENTO DADO E O LOG ESTÁ " + logAtualizado);
+
+            synchronized (ClienteThread.class) {
 
             if (assento[id_Assento].status == 0) {
                     assento[id_Assento].status = 1;
                     assento[id_Assento].id_Cliente = idCliente;
-
 
 //      ====================== ATIVIDADES DO LOG ======================
                     Vector estadosAssentos = new Vector();
@@ -168,21 +183,26 @@ class ClienteThread extends Thread {
 //      ===============================================================
 
 
-                    System.out.println("Cliente " + idCliente + " RESERVOU o assento " + assento[id_Assento].id_Assento + " como desejado");
-                    System.out.println("----- THREAD " + idCliente + " = NOTIFY DO ASSENTO DADO");
-
-                    notifyAll();
+                System.out.println("Cliente " + idCliente + " RESERVOU o assento " + assento[id_Assento].id_Assento + " como desejado");
+                mudaLog(logAtualizado);
+                notifyAll();
+                System.out.println("----- THREAD " + idCliente + " = NOTIFY DO ASSENTO DADO COM O LOG: " + logAtualizado);
                 return 1;
 
                 } else {
                     System.out.println("Cliente " + idCliente + " tentou reservar o assento desejado " + assento[id_Assento].id_Assento + " mas não conseguiu");
                     System.out.println("----- THREAD " + idCliente + " = NOTIFY DO ASSENTO DADO TRETA");
 
+                    mudaLog(logAtualizado);
                     notifyAll();
                 }
+            }
+
         } else {
             System.out.println("----- THREAD " + idCliente + " = WAIT DO ASSENTO DADO");
-            wait();
+            while (!logAtualizado){
+                Thread.sleep(1000);
+            }
         }
         return 0;
     }
@@ -190,12 +210,13 @@ class ClienteThread extends Thread {
     synchronized void liberaAssento(int id_Assento) throws InterruptedException {
         System.out.println("----- THREAD " + idCliente + " = VAI CHECAR O LOG PELA LIBERA: " + logAtualizado);
 
-        if (checaLog()){
+        if (logAtualizado){
+            mudaLog(logAtualizado);
 
 
 
 
-            System.out.println("----- THREAD " + idCliente + " = ENTROU NO LIBERA");
+            System.out.println("----- THREAD " + idCliente + " = ENTROU NO LIBERA E O LOG ESTÁ " + logAtualizado);
 
             if (assento[id_Assento].id_Cliente == idCliente && assento[id_Assento].status == 1) {
                 assento[id_Assento].status = 0;
@@ -227,12 +248,15 @@ class ClienteThread extends Thread {
                 System.out.println("Cliente " + idCliente + " tentou liberar o assento " + assento[id_Assento].id_Assento + " que já estava vazio");
             }
 
-            System.out.println("----- THREAD " + idCliente + " = NOTIFY DO LIBERA");
+            mudaLog(logAtualizado);
             notifyAll();
+            System.out.println("----- THREAD " + idCliente + " = NOTIFY DO LIBERA COM O LOG: " + logAtualizado);
 
         } else {
             System.out.println("WAIT DO LIBERA");
-            wait();
+            while (!logAtualizado){
+                Thread.sleep(1000);
+            }
         }
     }
 
@@ -240,14 +264,17 @@ class ClienteThread extends Thread {
         if (idCliente == 1) {
             int sucesso = 0;
             try {
+                esperaAleatoria();
                 visualizaAssentos();
+                esperaAleatoria();
                 sucesso = alocaAssentoLivre();
+                esperaAleatoria();
                 visualizaAssentos();
 
                 synchronized (this) {
                     barreira++;             // esta thread terminou sua execucao
                     System.out.println("VALOR DA BARREIRA: " + barreira);
-                    this.notifyAll();
+                    notifyAll();
                 }
 
             } catch (InterruptedException e) {
@@ -258,8 +285,11 @@ class ClienteThread extends Thread {
         if (idCliente == 2) {
             int sucesso = 0;
             try {
+                esperaAleatoria();
                 visualizaAssentos();
+                esperaAleatoria();
                 sucesso = alocaAssentoDado(1 + (int) (Math.random() * (assento.length - 1)));
+                esperaAleatoria();
                 visualizaAssentos();
 
                 synchronized (this) {
@@ -276,10 +306,15 @@ class ClienteThread extends Thread {
         if (idCliente == 3) {
             int sucesso = 0;
             try {
+                esperaAleatoria();
                 visualizaAssentos();
+                esperaAleatoria();
                 sucesso = alocaAssentoLivre();
+                esperaAleatoria();
                 visualizaAssentos();
+                esperaAleatoria();
                 liberaAssento(1 + (int) (Math.random() * (assento.length - 1)));
+                esperaAleatoria();
                 visualizaAssentos();
 
                 synchronized (this) {
@@ -300,6 +335,11 @@ class ClienteThread extends Thread {
 
         }
 
+    }
+
+    private void esperaAleatoria() throws InterruptedException {
+        int tempo = (int)(Math.random()*300)+200;
+        Thread.sleep(tempo);
     }
 
     private void imprimeLog() {
