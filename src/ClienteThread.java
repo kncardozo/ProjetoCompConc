@@ -12,9 +12,12 @@ class ClienteThread extends Thread {
     private static Vector log = new Vector();       //vetor do log que sera incrementado ao longo da execucao
     private static boolean logAtualizado = true;    //para garantir o padrao produtor/consumidor
     private static int barreira = 0;                //para garantir que o log seja gerado apenas ao final
+    private int qtd_assentos;
 
 
-//    construtor das treads de clientes
+
+
+    //    construtor das treads de clientes
     ClienteThread(int id, Assento[] assento) {
         this.idCliente = id;
         System.out.println("Cliente " + idCliente + " criado");
@@ -22,10 +25,12 @@ class ClienteThread extends Thread {
     }
 
 //    construtor da thread de escritura no arquivo log
-    ClienteThread(int id, String nome_arquivo_log) {
+    ClienteThread(int id, String nome_arquivo_log, int qtd_assentos) {
         this.idCliente = id;
         this.nome_arquivo_log= nome_arquivo_log;
         System.out.println("\nLog de ID " + idCliente + " criado");
+        this.qtd_assentos = qtd_assentos;
+
     }
 
     void checaLog(){
@@ -61,7 +66,8 @@ class ClienteThread extends Thread {
                 }
             }
             Vector temp = new Vector();
-            temp.add("1, " + String.valueOf(idCliente) + ", " + String.valueOf(estadosAssentos) + "\n");
+            temp.add("mapa = " + String.valueOf(estadosAssentos) + "\n" +
+                    "fop.op1("+ String.valueOf(idCliente) +",mapa)\n");
             log.add(temp);
 //      ===============================================================
 
@@ -129,7 +135,9 @@ class ClienteThread extends Thread {
                         }
                     }
                     Vector temp = new Vector();
-                    temp.add("2, " + String.valueOf(idCliente) + ", " + String.valueOf(assentoLivre) + ", " + String.valueOf(estadosAssentos) + "\n");
+                    temp.add("mapa = " + String.valueOf(estadosAssentos) + "\n" +
+                            "fop.op2(" + String.valueOf(idCliente) + "," + String.valueOf(assentoLivre) + ",mapa)\n");
+
                     log.add(temp);
 //      ===============================================================
 
@@ -178,7 +186,9 @@ class ClienteThread extends Thread {
                         }
                     }
                     Vector temp = new Vector();
-                    temp.add("3, " + String.valueOf(idCliente) + ", " + String.valueOf(id_Assento) + ", " + String.valueOf(estadosAssentos) + "\n");
+                    temp.add("mapa = " + String.valueOf(estadosAssentos) + "\n" +
+                            "fop.op3(" + String.valueOf(idCliente) + "," + String.valueOf(id_Assento) + ",mapa)\n");
+
                     log.add(temp);
 //      ===============================================================
 
@@ -234,7 +244,9 @@ class ClienteThread extends Thread {
                         }
                     }
                     Vector temp = new Vector();
-                    temp.add("4, " + String.valueOf(idCliente) + ", " + String.valueOf(id_Assento) + ", " + String.valueOf(estadosAssentos) + "\n");
+                    temp.add("mapa = " + String.valueOf(estadosAssentos) + "\n" +
+                            "fop.op4(" + String.valueOf(idCliente) + "," + String.valueOf(id_Assento) + ",mapa)\n");
+
                     log.add(temp);
 //      ===============================================================
 
@@ -331,7 +343,7 @@ class ClienteThread extends Thread {
         if(idCliente == 0){
             System.out.println("----- SOU O LOG E ME ACORDARAM");
             System.out.println("\n TODAS AS OUTRAS THREADS TERMINARAM");
-            imprimeLog();
+            imprimeLog(this.qtd_assentos);
 
         }
 
@@ -342,15 +354,20 @@ class ClienteThread extends Thread {
         Thread.sleep(tempo);
     }
 
-    private void imprimeLog() {
+    private void imprimeLog(int qtd_assentos) {
         try {
             String logString = String.valueOf(log);
             logString = logString.replace("[[","");
             logString = logString.replace("]]","");
             logString = logString.replace("], [","");
+            logString = logString.replace(" ","");
+
+            String inicio_log ="import fop\nfop.geraMapa("+ qtd_assentos + ")\n";
+            String fim_log ="fop.verificaCorretude()";
+            logString = inicio_log + logString + fim_log;
 
             FileWriter fw;
-            File arquivo = new File(nome_arquivo_log);
+            File arquivo = new File(nome_arquivo_log+".py");
             fw = new FileWriter(arquivo);
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(logString);
