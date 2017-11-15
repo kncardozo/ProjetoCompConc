@@ -20,10 +20,10 @@ public class Main {
         }
 
         // criando a thread de log
-        while (cliente[1].isAlive() || cliente[2].isAlive() || cliente[3].isAlive()) {
-            Thread.sleep(200);
-        }
-        ClienteThread log = new ClienteThread(0, nome_arquivo_log, qtd_assentos);
+//        while (cliente[1].isAlive() || cliente[2].isAlive() || cliente[3].isAlive()) {
+//            Thread.sleep(200);
+//        }
+        ClienteThread log = new ClienteThread(0, nome_arquivo_log, qtd_assentos,assento);
         log.start();
     }
 }
